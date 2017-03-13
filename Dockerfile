@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-RUN apt-get update && apt-get install -y xvfb chromium-browser python 3
+RUN apt-get update && apt-get install -y xvfb chromium-browser python3
 
 RUN mv /usr/bin/chromium-browser /usr/bin/chromium-browser-real
 ADD xvfb-chromium /usr/bin/xvfb-chromium
