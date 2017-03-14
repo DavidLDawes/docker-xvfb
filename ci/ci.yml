@@ -1,0 +1,63 @@
+resources:
+- name: dockerhub
+  type: docker-image
+  source:
+    repository: eruvanos/xvfb
+    username: {{docker_user}}
+    password: {{docker_password}}
+
+- name: git
+  type: git
+  source:
+    branch: master
+    uri: git@github.com:eruvanos/docker-xvfb.git
+    private_key: {{deploy_key}}
+
+jobs:
+- name: xvfb-basic
+  plan:
+  - get: git
+    trigger: true
+  - task: copy
+    config:
+      platform: linux
+      inputs:
+      - name: git
+      outputs:
+      - name: build
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          export TERM=dumb
+          cp -rf ./git/basic/* ./build      
+  - put: dockerhub
+    params:
+      build: build
+      tag_as_latest: true
+
+- name: xvfb-python3
+  plan:
+  - get: git
+    passed: [xvfb-basic]
+    trigger: true
+  - task: copy
+    config:
+      platform: linux
+      inputs:
+      - name: git
+      outputs:
+      - name: build
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          export TERM=dumb
+          echo "python3">./build/tag.txt
+          cp -rf ./git/python3/* ./build      
+  - put: dockerhub
+    params:
+      build: build
+      tag: build/tag.txt
